@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 stdout = logging.getLogger('stdout.{}'.format(__name__))
 
 
-def sphinx_script(ctx, virtualenv, script, args=[]):
+def sphinx_script(ctx, virtualenv, script, args=[], env=None, clear_env=False):
     script_path = os.path.join(ctx.obj['project_root'],
                                virtualenv['path'],
                                'bin',
@@ -26,7 +26,7 @@ def sphinx_script(ctx, virtualenv, script, args=[]):
     process_args = []
     process_args.append(script_path)
     process_args.extend(args)
-    interactive(process_args)
+    interactive(process_args, env=env)
 
 
 def sphinx_clean(ctx, virtualenv, documentation_path):

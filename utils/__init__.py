@@ -1,4 +1,5 @@
 import logging
+import os
 import select
 import subprocess
 import sys
@@ -31,19 +32,32 @@ def oneline_run(args):
     return run(args, oneline_mode=True)
 
 
-def run(args, oneline_mode=False):
+def run(args, oneline_mode=False, env=None, clear_env=False):
+    p_env = dict(os.environ)
+    if env is not None:
+        if clear_env:
+            p_env = env
+        else:
+            p_env.update(env)
     p = subprocess.Popen(args,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE,
+                         env=p_env)
     logger.debug('utils.oneline_run: running {}'
                  .format(' '.join(args)))
     return _subprocess_run(p, oneline_mode=oneline_mode)
 
 
-def interactive(args):
+def interactive(args, env=None, clear_env=False):
+    p_env = dict(os.environ)
+    if env is not None:
+        if clear_env:
+            p_env = env
+        else:
+            p_env.update(env)
     logger.debug('utils.interactive: running {}'
                  .format(' '.join(args)))
-    subprocess.check_call(args)
+    subprocess.check_call(args, env=p_env)
 
 
 def _subprocess_run(subprocess,
@@ -52,7 +66,7 @@ def _subprocess_run(subprocess,
                     write_stdout=sys.stdout,
                     write_stderr=sys.stdout,
                     oneline_mode=True,
-                    oneline_timing=.05):
+                    oneline_timing=.01):
     if _terminal_width() is None and oneline_mode:
         logger.warn('online_mode disabled as terminal width is not found')
         oneline_mode = False
