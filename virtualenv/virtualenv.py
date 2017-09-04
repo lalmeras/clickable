@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 stdout = logging.getLogger('.'.join(['stdout', __name__]))
 
 
-def _virtualenv(ctx, virtualenv):
+def _virtualenv(path_resolver, virtualenv):
     """
     Initialize a virtualenv folder.
 
@@ -26,11 +26,9 @@ def _virtualenv(ctx, virtualenv):
 
     """
     # only create if missing
-    virtualenv_path = os.path.join(ctx.obj['project_root'], virtualenv['path'])
-    virtualenv_path_short = os.path.relpath(virtualenv_path,
-                                            ctx.obj['project_root'])
-    virtualenv_path = os.path.normpath(virtualenv_path)
-    if not _check_virtualenv(ctx, virtualenv_path):
+    virtualenv_path = path_resolver.resolve_relative(virtualenv['path'])
+    virtualenv_path_short = virtualenv['path']
+    if not _check_virtualenv(virtualenv_path):
         stdout.info('virtualenv: {} missing, creating...'
                     .format(os.path.basename(virtualenv_path_short)))
         # create parent folder if missing
@@ -43,7 +41,7 @@ def _virtualenv(ctx, virtualenv):
                              stderr=subprocess.PIPE)
         _subprocess_run(p)
         # check consistency; virtualenv must be valid now
-        if not _check_virtualenv(ctx, virtualenv_path):
+        if not _check_virtualenv(virtualenv_path):
             raise Exception('virtualenv {} creation fails'
                             .format(virtualenv_path))
     else:
@@ -51,7 +49,7 @@ def _virtualenv(ctx, virtualenv):
                     .format(os.path.basename(virtualenv_path_short)))
 
 
-def _check_virtualenv(ctx, virtualenv_path):
+def _check_virtualenv(virtualenv_path):
     """
     Check if virtualenv is initialized in virtualenv folder (based on
     bin/python file).
@@ -85,12 +83,12 @@ def _check_virtualenv(ctx, virtualenv_path):
     return p is not None and p.returncode == 0
 
 
-def _pip_packages(ctx, virtualenv):
+def _pip_packages(path_resolver, virtualenv):
     """
     Install pypi packages (with pip) inside a virtualenv environment.
     """
-    pip_binary = os.path.join(ctx.obj['project_root'],
-                              virtualenv['path'], 'bin', 'pip')
+    pip_binary = os.path.join(
+        path_resolver.resolve_relative(virtualenv['path']), 'bin', 'pip')
     pip_binary = os.path.normpath(pip_binary)
 
     # store initial state

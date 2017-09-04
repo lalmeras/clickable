@@ -1,17 +1,34 @@
 import logging
 import os
+import os.path
 import select
 import subprocess
 import sys
 import time
+from types import ModuleType
 
 from blessings import Terminal
 
+import six
 
 logger = logging.getLogger(__name__)
 stdout = logging.getLogger('.'.join(['stdout', __name__]))
 
 __terminal_width = None
+
+
+class PathResolver(object):
+    def __init__(self, base_element):
+        if type(base_element) == ModuleType:
+            self.base_path = os.path.dirname(base_element.__file__)
+        elif isinstance(base_element, six.string_types):
+            self.base_path = os.path.abspath(base_element)
+            if not os.path.isabs(base_element):
+                logger.warn('non-absolute path is resolved as {}'
+                            .format(self.base_path))
+
+    def resolve_relative(self, path):
+        return os.path.normpath(os.path.join(self.base_path, path))
 
 
 def _terminal_width():
