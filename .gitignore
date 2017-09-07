@@ -1,0 +1,7 @@
+.tools
+*.pyc
+*.swp
+
+build/**
+
+!.gitkeep
