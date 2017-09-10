@@ -21,7 +21,7 @@ mirror {src} {dest} -R {dry_run} -n {excludes} {delete};
 quit
 """.format(src=src, dest=parsed_url.path,
            dry_run='--dry-run' if dry_run else '',
-           excludes=excludes_args,
+           excludes=' '.join(excludes_args),
            delete='--delete' if delete else '',
            pre=';\n'.join(pre_commands)))
     known_modes = ['interactive', 'oneline']
