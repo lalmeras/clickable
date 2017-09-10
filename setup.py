@@ -37,7 +37,6 @@ setup(
     packages=find_packages(include=['clickable']),
     entry_points={
         'console_scripts': [
-            'clickable=clickable.cli:main'
         ]
     },
     include_package_data=True,
