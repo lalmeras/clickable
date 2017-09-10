@@ -34,7 +34,7 @@ setup(
     author="Laurent Almeras",
     author_email='lalmeras@gmail.com',
     url='https://github.com/lalmeras/clickable',
-    packages=find_packages(include=['clickable']),
+    packages=find_packages(include=['clickable', 'clickable.*']),
     entry_points={
         'console_scripts': [
         ]
