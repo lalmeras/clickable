@@ -13,6 +13,10 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click >=6.0, <7.0',
+    'blessings ==1.6',
+    'coloredlogs ==7.3',
+    'ruamel.yaml ==0.15.33',
+    'six ==1.10.0'
 ]
 
 setup_requirements = [
