@@ -26,7 +26,7 @@ def sphinx_script(ctx, virtualenv, script, args=[], env=None, clear_env=False):
     process_args = []
     process_args.append(script_path)
     process_args.extend(args)
-    interactive(process_args, env=env)
+    interactive(process_args, clear_env=clear_env, env=env)
 
 
 def sphinx_clean(ctx, virtualenv, documentation_path):

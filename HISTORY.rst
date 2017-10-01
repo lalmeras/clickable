@@ -2,6 +2,12 @@
 History
 =======
 
+0.0.3 (2017-10-01)
+------------------
+
+* correctly handle clear_env in sphinx:sphinx_script
+
+
 0.0.1 (2017-09-10)
 ------------------
 
