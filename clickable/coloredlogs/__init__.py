@@ -13,5 +13,7 @@ def bootstrap():
     logging.getLogger().addFilter(filter)
     logger_format = '*** %(name)s %(levelname)-7s %(message)s'
     stdout_format = '* %(levelname)-7s %(message)s'
-    coloredlogs.install(level='WARNING', logger=logger, fmt=logger_format)
-    coloredlogs.install(level='INFO', logger=stdout, fmt=stdout_format)
+    coloredlogs.install(level='DEBUG', logger=logger, fmt=logger_format)
+    coloredlogs.install(level='DEBUG', logger=stdout, fmt=stdout_format)
+    logger.setLevel(logging.WARN)
+    stdout.setLevel(logging.INFO)
