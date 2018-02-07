@@ -32,3 +32,31 @@ quit
         interactive(args)
     elif subprocess_mode == 'oneline':
         oneline_run(args)
+
+
+def rsync(src, dest, options='-az', excludes=[], delete=True, dry_run=False,
+              subprocess_mode='interactive'):
+    excludes_args = ['--exclude={}'.format(i) for i in excludes]
+
+    args = []
+    # rsync {options} [--dry_run] [--delete] {excludes} {src} {dest}
+    args.append('rsync')
+    if options:
+        args.append(options)
+    if dry_run:
+        args.append('--dry-run')
+    if delete:
+        args.append('--delete')
+    if excludes_args:
+        args.extend(excludes_args)
+    args.append(src)
+    args.append(dest)
+
+    known_modes = ['interactive', 'oneline']
+    if subprocess_mode not in known_modes:
+        raise Exception('subprocess_mode {} not allowed, expected ({})'
+                        .format(subprocess_mode, ', '.join(known_modes)))
+    if subprocess_mode == 'interactive':
+        interactive(args)
+    elif subprocess_mode == 'oneline':
+        oneline_run(args)
