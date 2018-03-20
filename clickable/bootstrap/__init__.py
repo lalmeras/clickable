@@ -15,41 +15,57 @@ from clickable.coloredlogs import bootstrap
 
 
 bootstrap()
-log = logging.getLogger('clickable')
+log = logging.getLogger('clickable.bootstrap')
+cli = logging.getLogger('stdout.clickable')
 
 
-def setup(name, version='dev', description=None):
+def setup(name, version='dev', description=None, entry_points={}):
+    """
+    Perform a setuptools setup with a minimal configuration.
+    """
     _setup(name=name,
           version=version,
           description=description,
           packages=[],
-          entry_points={
-              'console_scripts': [
-                  '{}=clickable.bootstrap:main'.format(name)
-              ]
-          },
+          entry_points=entry_points,
           include_package_data=False,
           zip_safe=False
     )
 
 # TODO: allow to use a file not named setup.py
-def run_setup(setup_py, name, version='dev', description=None):
+def run_setup(setup_py, name, version='dev', description=None,
+              entry_points={}):
+    """
+    Either launch a pip install -e command or perform
+    python setup.py [command] related to a pip install.
+
+    This behavior is due to the fact we want to handle the whole
+    bootstrap process with a same function call.
+
+    Environment variable CLICKABLE_SETUP allow to detect if
+    we are before pip call (false) or after (true).
+    """
     if os.environ.get('CLICKABLE_SETUP', 'false') == 'true':
-        setup(name, version, description)
+        setup(name, version, description, entry_points)
     else:
         try:
-            run_pip_command(setup_py, name, version, description)
+            run_pip_command(setup_py)
             sys.exit(0)
         except Exception:
             log.exception('clickable: {} installation failed'.format(setup_py))
 
-def run_pip_command(target_py, name, version='dev', description=None):
+def run_pip_command(target_py):
+    """
+    Perform a pip install of the targeted .py file. If file is not
+    a 'setup.py' file, a setup.py proxy is created and used.
+    """
     target_py_fn = os.path.basename(target_py)
     target_dir = os.path.dirname(target_py)
     setup_py = target_py
     setup_dir = target_dir
     if target_py_fn != 'setup.py':
         # TODO replace .py only at file end
+        # TODO remove tmp file once install is done
         target_py_mod = target_py_fn.replace('.py', '')
         tempdir = tempfile.mkdtemp()
         setup_py = os.path.join(tempdir, 'setup.py')
@@ -62,7 +78,9 @@ import os
 sys.path.insert(0, {0})
 __import__({1})
 """.format(repr(os.path.abspath(target_dir)), repr(target_py_mod)))
-        subprocess.check_call(['cat', setup_py])
+            if log.isEnabledFor(logging.DEBUG):
+                content = subprocess.check_output(setup_py)
+                log.debug(content)
     python_exec = sys.executable
     python_dir = os.path.dirname(python_exec)
     environ = dict(os.environ)
@@ -74,9 +92,3 @@ __import__({1})
         pip = pip[0]
         environ['CLICKABLE_SETUP'] = 'true'
         subprocess.check_call([pip, 'install', '-e', setup_dir], env=environ)
-
-
-def main():
-    print('success')
-
-          
