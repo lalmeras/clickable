@@ -27,14 +27,19 @@ class BootstrapEnvironment(object):
         self.requirements = requirements
 
 
-def setup(name, version='dev', description=None, entry_points={}):
+def setup(target_py,
+          name, version='dev', description=None,
+          entry_points={},
+          package_dir={}, packages=[]):
     """
     Perform a setuptools setup with a minimal configuration.
     """
+    project_path = os.path.dirname(target_py)
     _setup(name=name,
           version=version,
           description=description,
-          packages=[],
+          package_dir={'': os.path.abspath(project_path)},
+          packages=packages,
           entry_points=entry_points,
           include_package_data=False,
           zip_safe=False
@@ -42,8 +47,9 @@ def setup(name, version='dev', description=None, entry_points={}):
 
 
 # TODO: allow to use a file not named setup.py
-def run_setup(setup_py, name, version='dev', description=None,
-              entry_points={}, callback=None):
+def run_setup(target_py, name, version='dev', description=None,
+              entry_points={}, callback=None,
+              package_dir={}, packages=[]):
     """
     Either launch a pip install -e command or perform
     python setup.py [command] related to a pip install.
@@ -55,15 +61,18 @@ def run_setup(setup_py, name, version='dev', description=None,
     we are before pip call (false) or after (true).
     """
     if os.environ.get('CLICKABLE_SETUP', 'false') == 'true':
-        setup(name, version, description, entry_points)
+        setup(target_py, name,
+              version=version, description=description,
+              entry_points=entry_points,
+              package_dir=package_dir, packages=packages)
     else:
         try:
-            bootstrapenv = run_pip_command(setup_py)
+            bootstrapenv = run_pip_command(target_py)
             if callback:
                 callback(bootstrapenv)
             sys.exit(0)
         except Exception:
-            log.exception('clickable: {} installation failed'.format(setup_py))
+            log.exception('clickable: {} installation failed'.format(target_py))
 
 
 def run_pip_command(target_py):
@@ -71,28 +80,7 @@ def run_pip_command(target_py):
     Perform a pip install of the targeted .py file. If file is not
     a 'setup.py' file, a setup.py proxy is created and used.
     """
-    target_py_fn = os.path.basename(target_py)
-    target_dir = os.path.dirname(target_py)
-    setup_py = target_py
-    setup_dir = target_dir
-    if target_py_fn != 'setup.py':
-        # TODO replace .py only at file end
-        # TODO remove tmp file once install is done
-        target_py_mod = target_py_fn.replace('.py', '')
-        tempdir = tempfile.mkdtemp()
-        setup_py = os.path.join(tempdir, 'setup.py')
-        setup_dir = os.path.dirname(setup_py)
-        with open(setup_py, 'w') as f:
-            f.write("""
-import sys
-import os
-
-sys.path.insert(0, {0})
-__import__({1})
-""".format(repr(os.path.abspath(target_dir)), repr(target_py_mod)))
-            if log.isEnabledFor(logging.DEBUG):
-                content = subprocess.check_output(setup_py)
-                log.debug(content)
+    (setup_py, setup_dir) = proxy_target_py(target_py)
     python_exec = sys.executable
     python_dir = os.path.dirname(python_exec)
     environ = dict(os.environ)
@@ -103,7 +91,7 @@ __import__({1})
     if pip:
         pip = pip[0]
         environ['CLICKABLE_SETUP'] = 'true'
-        subprocess.check_call([pip, 'install', '-e', setup_dir], env=environ)
+        subprocess.check_call([pip, 'install', setup_dir], env=environ)
         bin_path = os.path.relpath(os.path.dirname(sys.executable))
         return BootstrapEnvironment(
                 interpreter=sys.executable,
@@ -111,3 +99,40 @@ __import__({1})
                 deactivate=os.path.join(bin_path, 'deactivate'),
                 requirements=subprocess.check_output([pip, 'freeze']).splitlines()
         )
+
+
+def proxy_target_py(target_py):
+    """
+    When we do not have a setup.py as configuration file, create a fake
+    temporary directory with a setup.py bound to target_py file.
+
+    This directory cannot be used for an *editable* install as in
+    this case, egg-info file is not created by python setup.py where
+    pip expects it.
+    """
+    target_py_fn = os.path.basename(target_py)
+    target_dir = os.path.dirname(target_py)
+
+    if target_py_fn == 'setup.py':
+        return (target_py_fn, target_dir)
+    else:
+        # TODO replace .py only at file end
+        # TODO remove tmp file once install is done
+        target_py_mod = target_py_fn.replace('.py', '')
+        tempdir = tempfile.mkdtemp()
+        setup_py = os.path.join(tempdir, 'setup.py')
+        setup_dir = os.path.dirname(setup_py)
+        with open(setup_py, 'w') as f:
+            f.write("""
+import os
+import os.path
+import sys
+
+os.chdir(os.path.dirname(__file__))
+sys.path.insert(0, {0})
+__import__({1})
+""".format(repr(os.path.abspath(target_dir)), repr(target_py_mod)))
+            if log.isEnabledFor(logging.DEBUG):
+                content = subprocess.check_output(setup_py)
+                log.debug(content)
+        return (setup_py, setup_dir)
