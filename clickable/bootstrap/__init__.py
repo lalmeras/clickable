@@ -91,7 +91,7 @@ def run_pip_command(target_py):
     if pip:
         pip = pip[0]
         environ['CLICKABLE_BOOTSTRAP'] = 'true'
-        subprocess.check_call([pip, 'install', setup_dir], env=environ)
+        subprocess.check_call([pip, 'install', '-U', setup_dir], env=environ)
         bin_path = os.path.relpath(os.path.dirname(sys.executable))
         return BootstrapEnvironment(
                 interpreter=sys.executable,
