@@ -70,9 +70,9 @@ def run_setup(target_py, name, version='dev', description=None,
             bootstrapenv = run_pip_command(target_py)
             if callback:
                 callback(bootstrapenv)
-            sys.exit(0)
         except Exception:
             log.exception('clickable: {} installation failed'.format(target_py))
+    sys.exit(0)
 
 
 def run_pip_command(target_py):
