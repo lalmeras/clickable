@@ -57,10 +57,10 @@ def run_setup(target_py, name, version='dev', description=None,
     This behavior is due to the fact we want to handle the whole
     bootstrap process with a same function call.
 
-    Environment variable CLICKABLE_SETUP allow to detect if
-    we are before pip call (false) or after (true).
+    Environment variable CLICKABLE_BOOTSTRAP allow to detect if
+    we are before pip call (absent) or after (present).
     """
-    if os.environ.get('CLICKABLE_SETUP', 'false') == 'true':
+    if 'CLICKABLE_BOOTSTRAP' in os.environ:
         setup(target_py, name,
               version=version, description=description,
               entry_points=entry_points,
@@ -90,7 +90,7 @@ def run_pip_command(target_py):
     pip = [path for path in [os.path.join(i, 'pip') for i in paths] if os.path.exists(path)]
     if pip:
         pip = pip[0]
-        environ['CLICKABLE_SETUP'] = 'true'
+        environ['CLICKABLE_BOOTSTRAP'] = 'true'
         subprocess.check_call([pip, 'install', setup_dir], env=environ)
         bin_path = os.path.relpath(os.path.dirname(sys.executable))
         return BootstrapEnvironment(
