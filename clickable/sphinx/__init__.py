@@ -43,6 +43,18 @@ def sphinx_click_group(click_group, sphinx_provider,
         sphinx_live(path_provider(ctx), sphinx_provider(ctx),
                     virtualenv_provider(ctx))
 
+    @click_group.command()
+    @click.option('--project', help='project name')
+    @click.option('--author', help='author')
+    @click.option('--version', help='version')
+    @click.option('--language', help='language (fr, en, ...)')
+    @click.option('--epub', is_flag=True, default=False, help='enable epub')
+    @click.pass_context
+    def quickstart(ctx, project, author, version, language, epub):
+        virtualenv(path_provider(ctx), virtualenv_provider(ctx))
+        sphinx_quickstart(path_provider(ctx), sphinx_provider(ctx),
+                          virtualenv_provider(ctx),
+                          project, author, version, language, epub)
 
 def sphinx_script(path_resolver, virtualenv_config, script, args=None):
     script_path = path_resolver.resolve_relative(
@@ -117,3 +129,26 @@ def sphinx_live(path_resolver, sphinx_config, virtualenv_config):
     args.append(sphinx_source_path)
     args.append(sphinx_build_path)
     sphinx_script(path_resolver, virtualenv_config, 'sphinx-autobuild', args)
+
+
+def sphinx_quickstart(path_resolver, sphinx_config, virtualenv_config,
+                      project, author, version, language, epub):
+    args = []
+    args.append('-q')
+    args.append('--suffix=.rst')
+    args.append('--suffix=.md')
+    args.append('--master=index.rst')
+    args.append('--sep')
+    args.append('--ext-todo')
+    args.append('--no-makefile')
+    args.append('--no-batchfile')
+    args.append('--release={}'.format(version))
+    args.append('--project={}'.format(project))
+    args.append('--author={}'.format(author))
+    args.extend(['-v', version])
+    args.extend([
+        '-d',
+        'path={}'.format(sphinx_config['documentation_path'])
+    ])
+    args.extend(['-d', 'language={}'.format(language)])
+    sphinx_script(path_resolver, virtualenv_config, 'sphinx-quickstart', args)
