@@ -3,4 +3,4 @@ blessings==1.6.1
 coloredlogs ==7.3
 ruamel.yaml==0.15.37
 six ==1.10.0
-invoke
+invoke==1.1.1
