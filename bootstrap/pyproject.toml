@@ -1,0 +1,12 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "clickable_bootstrap"
+author = "Laurent Almeras"
+author-email = "lalmeras@gmail.com"
+home-page = "https://github.com/lalmeras/clickable"
+classifiers = ["License :: OSI Approved :: MIT License"]
+requires = ["clickable_logging == 0.9.0"]
+dev-requires = ["IPython", "pytest"]
