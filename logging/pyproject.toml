@@ -1,0 +1,13 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "clickable_logging"
+author = "Laurent Almeras"
+author-email = "lalmeras@gmail.com"
+home-page = "https://github.com/lalmeras/clickable"
+classifiers = ["License :: OSI Approved :: MIT License"]
+requires = ["coloredlogs==7.3"]
+dev-requires = ["pytest", "IPython"]
+
