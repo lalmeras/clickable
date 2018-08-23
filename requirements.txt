@@ -1,6 +1,6 @@
 Click >=6.0, <7.0
 blessings==1.6.1
 coloredlogs ==7.3
-ruamel.yaml==0.15.37
+ruamel.yaml==0.15.61
 six ==1.10.0
 invoke
