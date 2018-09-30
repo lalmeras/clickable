@@ -64,4 +64,6 @@ target/
 # pyenv python configuration file
 .python-version
 
+.pytest_cache
+
 !.gitkeep
