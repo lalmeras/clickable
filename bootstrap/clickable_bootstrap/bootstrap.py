@@ -1,6 +1,6 @@
 #! /bin/env python2
 # -*- encoding: utf-8 -*-
-# vim: tabstop=2 shiftwidth=2 expandtab ai
+# vim: tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
 
 from __future__ import print_function, unicode_literals
 
@@ -21,7 +21,7 @@ import tempfile
 
 description = \
 """
-boostrap.py install a working conda or virtualenv environment.
+boostrap.py install a working conda environment.
 """
 
 
@@ -70,20 +70,46 @@ def ansible_playbook(prefix, ansible_prefix, playbook, debug=False):
   run(ansible_args, env={'ANSIBLE_CONFIG': ansible_config}, debug=debug)
 
 
-def bootstrap(reset=False, debug=False):
-  """Delete existing Miniconda if reset=True.
+def bootstrap(prefix, name, environment, reset_conda=False, reset_env=False, debug=False):
+  """Delete existing Miniconda if reset_conda=True.
   Print verbose output (stderr of commands and debug messages) if debug=True.
   """
-  home = os.getenv('HOME')
-  prefix = os.path.join(home, '.miniconda2')
-  if reset:
+  script_path = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
+  print("[INFO] Using {0} as script directory".format(script_path), file=sys.stderr)
+
+  if name is None:
+    print("[INFO] Environment name computed from script directory", file=sys.stderr)
+    name = os.path.basename(script_path)
+  print("[INFO] Using {0} as environment name".format(name), file=sys.stderr)
+
+  if environment is None:
+    print("[INFO] Environment file computed from script directory", file=sys.stderr)
+    environment = os.path.join(script_path, 'environment.yml')
+  print("[INFO] Using {0} as environment file".format(environment), file=sys.stderr)
+
+  skip_install = False
+  if not os.path.exists(environment):
+    print("[WARN] Environment file {0} missing; install will be skipped".format(environment), file=sys.stderr)
+    skip_install = True
+
+  # handle ~/ paths
+  prefix = os.path.expanduser(prefix)
+  prefix_parent = os.path.dirname(prefix)
+  if not os.path.exists(prefix_parent):
+    try:
+      print("[INFO] Creating directory {0}".format(prefix_parent), file=sys.stderr)
+      os.makedirs(prefix_parent)
+    except Exception as e:
+      raise Exception("Error creating {0}".format(prefix_parent), file=sys.stderr)
+  if reset_conda:
     if os.path.exists(prefix):
       print("[INFO] Destroying existing env: {0}.".format(prefix), file=sys.stderr)
       shutil.rmtree(prefix)
   miniconda_script = None
   miniconda_install = True
   if os.path.exists(prefix):
-    print("[INFO] Env {0} already exists; use --reset to destroy and recreate it.".format(prefix), file=sys.stderr)
+    print("[INFO] Env {0} already exists; use --reset-conda to destroy and recreate it.".format(prefix),
+        file=sys.stderr)
     miniconda_install = False
   try:
     if miniconda_install:
@@ -95,17 +121,50 @@ def bootstrap(reset=False, debug=False):
     # Upgrade pip
     pip_upgrade_args = [os.path.join(prefix, 'bin', 'pip'), 'install', '--upgrade', 'pip']
     run(pip_upgrade_args, debug=debug)
-    ## Install ansible 2.4
-    #pip_install_ansible_args = [os.path.join(prefix, 'bin', 'pip'), 'install', '-I', 'ansible==2.4.2.0']
-    #run(pip_install_ansible_args, debug=debug)
-    ## Install git >=2.17
-    #pip_install_ansible_args = [os.path.join(prefix, 'bin', 'conda'), 'install', '-y', 'git>=2.17']
-    #run(pip_install_ansible_args, debug=debug)
+
+    env_exists = False
+    try:
+      subprocess.check_output([os.path.join(prefix, 'bin', 'conda'), 'list', '-n', name],
+          stderr=subprocess.STDOUT)
+      env_exists = True
+    except subprocess.CalledProcessError as e:
+      if debug:
+        print("[DEBUG] Trigger {0} creation as conda list failed: {1}".format(name, e.output),
+            file=sys.stderr)
+
+    if reset_env and env_exists:
+      print("[INFO] Removing {0} ".format(name), file=sys.stderr)
+      try:
+        subprocess.check_output([os.path.join(prefix, 'bin', 'conda'), 'env', 'remove', '-n', name, '-y'],
+          stderr=subprocess.STDOUT)
+        env_exists = False
+      except subprocess.CalledProcessError as e:
+        raise Exception("[FATAL] Error removing {0}: {1}".format(name, e.output))
+    elif env_exists:
+      print("[INFO] Env {0} already exists; use --reset-env to destroy and recreate it.".format(name),
+        file=sys.stderr)
+
+    if not env_exists:
+      print("[INFO] Creating {0} ".format(name), file=sys.stderr)
+      try:
+        subprocess.check_output([os.path.join(prefix, 'bin', 'conda'), 'create', '-n', name, '-y'],
+          stderr=subprocess.STDOUT)
+      except subprocess.CalledProcessError as e:
+        raise Exception("[FATAL] Error creating {0}: {1}".format(name, e.output))
+
+    if not skip_install:
+      print("[INFO] Installing {0} ".format(name), file=sys.stderr)
+      try:
+        subprocess.check_output([os.path.join(prefix, 'bin', 'conda'), 'env', 'update', '-n', name, '--file', environment],
+          stderr=subprocess.STDOUT)
+      except subprocess.CalledProcessError as e:
+        raise Exception("[FATAL] Error installing {0}: {1}".format(name, e.output))
+
     # Activate Miniconda env
     print("[INFO] Env {0} initialized.".format(prefix), file=sys.stderr)
     # TODO: env activation (?)
   except Exception as e:
-    print('[ERROR] Bootstrap failure: {0}'.format(str(e)))
+    print('[ERROR] Bootstrap failure: {0}'.format(str(e)), file=sys.stderr)
     if not debug:
       if miniconda_script:
         try:
@@ -119,9 +178,19 @@ def bootstrap(reset=False, debug=False):
 
 def parser():
   """Command line parsing"""
-  cmd = argparse.ArgumentParser(description='Initialize a conda or virtualenv environment.')
-  cmd.add_argument('--reset', dest='reset', action='store_true')
-  cmd.add_argument('--debug', dest='debug', action='store_true')
+  cmd = argparse.ArgumentParser(description='Initialize a conda environment.')
+  cmd.add_argument('--reset-conda', dest='reset_conda', action='store_true', default=False,
+      help='Delete existing conda install')
+  cmd.add_argument('--reset-env', dest='reset_env', action='store_true', default=False,
+      help='Delete existing conda environment')
+  cmd.add_argument('--debug', dest='debug', action='store_true', default=False,
+      help='Activate debug output')
+  cmd.add_argument('--prefix', dest='prefix', default='~/.miniconda2',
+      help='Prefix for conda environment')
+  cmd.add_argument('--name', dest='name', default=None,
+      help='Name for your conda environment; if not provided use parent directory basename')
+  cmd.add_argument('--environment', dest='environment', default=None,
+      help='environment.yml for your conda environment; if not provided use SCRIPT_PATH/environment.yml')
   return cmd
 
 
