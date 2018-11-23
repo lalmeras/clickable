@@ -7,7 +7,7 @@ import sys
 
 def main():
     # TODO: perform filename search
-    filename = 'tasks.py'
+    filename = 'clickables.py'
     dirname = os.path.dirname(filename)
     if not dirname in sys.path:
         sys.path.insert(0, dirname)
