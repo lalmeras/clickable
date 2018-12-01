@@ -5,6 +5,8 @@ import logging
 import os.path
 import subprocess
 
+import six
+
 from clickable.utils import _subprocess_run
 
 logger = logging.getLogger(__name__)
@@ -168,6 +170,6 @@ def _pip_freeze(pip_binary):
     if p.returncode != 0:
         raise Exception(out)
     pkglist = out
-    pkglist_str = unicode(pkglist, "utf-8")
+    pkglist_str = six.u(pkglist)
     pkglist_set = set(pkglist_str.splitlines())
     return pkglist_set

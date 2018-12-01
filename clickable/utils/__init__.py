@@ -112,7 +112,7 @@ def _subprocess_run(subprocess,
         for fd in ret[0]:
             stream_desc = streams[fd]
             stream = streams[fd]['stream']
-            output = stream_desc['pipe'].read()
+            output = stream_desc['pipe'].read().decode('utf-8')
             if stream_desc['return']:
                 whole += output
             if not oneline_mode and stream_desc['write'] is not None:
