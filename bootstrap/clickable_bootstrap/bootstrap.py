@@ -67,12 +67,6 @@ def download(url, debug=False):
   return (handle, abspath)
 
 
-def ansible_playbook(prefix, ansible_prefix, playbook, debug=False):
-  ansible_args = [os.path.join(prefix, 'bin', 'ansible-playbook'), playbook]
-  ansible_config = os.path.join(ansible_prefix, 'ansible.cfg')
-  run(ansible_args, env={'ANSIBLE_CONFIG': ansible_config}, debug=debug)
-
-
 def bootstrap(prefix, name, environment, reset_conda=False, reset_env=False, debug=False):
   """Delete existing Miniconda if reset_conda=True.
   Print verbose output (stderr of commands and debug messages) if debug=True.
@@ -178,6 +172,21 @@ def bootstrap(prefix, name, environment, reset_conda=False, reset_env=False, deb
       except subprocess.CalledProcessError as e:
         # python2.6: index is mandatory
         raise Exception("[FATAL] Error installing {0}: {1}".format(name, e.output))
+ 
+    command = os.getenv('BOOTSTRAP_COMMAND', None)
+    if command is not None:
+      # python2.6: index is mandatory
+      print("[INFO] Running {0} in env {1}".format(command, name), file=sys.stderr)
+      try:
+        activate_conda = ['.', os.path.join(prefix, 'bin/activate')]
+        activate_env = ['conda', 'activate', name]
+        whole_command = ' '.join(activate_conda + ['&&'] + activate_env + ['&&'] + [command])
+        subprocess.check_call(whole_command, shell=True, stderr=subprocess.STDOUT)
+      except subprocess.CalledProcessError as e:
+        # python2.6: index is mandatory
+        raise Exception("[FATAL] Error running {0}: {1}".format(command, e.output))
+
+
 
     # Activate Miniconda env
     # python2.6: index is mandatory
