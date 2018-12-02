@@ -71,7 +71,7 @@ def bootstrap(prefix, name, environment, reset_conda=False, reset_env=False, deb
   """Delete existing Miniconda if reset_conda=True.
   Print verbose output (stderr of commands and debug messages) if debug=True.
   """
-  script_path = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
+  script_path = os.getcwd()
   # python2.6: index is mandatory
   print("[INFO] Using {0} as script directory".format(script_path), file=sys.stderr)
 
@@ -185,8 +185,6 @@ def bootstrap(prefix, name, environment, reset_conda=False, reset_env=False, deb
       except subprocess.CalledProcessError as e:
         # python2.6: index is mandatory
         raise Exception("[FATAL] Error running {0}: {1}".format(command, e.output))
-
-
 
     # Activate Miniconda env
     # python2.6: index is mandatory
