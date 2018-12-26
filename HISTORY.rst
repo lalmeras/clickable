@@ -2,6 +2,18 @@
 History
 =======
 
+0.3.0 (2018-12)
+---------------
+
+* remove clickable.bootstrap module
+* clickable.click use 'main' as default function when searching
+  an entry-point in clickables.py
+* tasks.py renamed to clickables.yml
+* added an helper to load base configuration from clickables.yml
+  (clickables.utils.load_config)
+* python3 support (wip)
+
+
 0.2.0 (2018-12-26)
 ------------------
 
