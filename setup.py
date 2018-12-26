@@ -22,7 +22,7 @@ test_requirements = [
 
 setup(
     name='clickable',
-    version='0.2.0dev',
+    version='0.2.0',
     description=("Helper scripts to write click applications development's "
                  "environment"),
     long_description=readme + '\n\n' + history,
