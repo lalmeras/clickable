@@ -1,6 +1,7 @@
 import logging
 import os
 import os.path
+import pprint
 import select
 import subprocess
 import sys
@@ -8,6 +9,8 @@ import time
 from types import ModuleType
 
 from blessings import Terminal
+
+from ruamel.yaml import YAML
 
 import six
 
@@ -29,6 +32,22 @@ class PathResolver(object):
 
     def resolve_relative(self, path):
         return os.path.normpath(os.path.join(self.base_path, path))
+
+
+def load_config(click_ctx, module_name, clickables_py, conf_filename = 'clickables.yml'):
+    if not hasattr(click_ctx, 'obj') or not click_ctx.obj:
+        click_ctx.obj = {}
+    click_ctx.obj['path_resolver'] = PathResolver(sys.modules[module_name])
+    click_ctx.obj['project_root'] = os.path.dirname(clickables_py)
+    conf_path = os.path.join(click_ctx.obj['project_root'], 'clickables.yml')
+    if os.path.isfile(conf_path):
+        with open(conf_path) as f:
+            yaml = YAML(typ='safe')
+            configuration = yaml.load(f)
+            click_ctx.obj.update(configuration)
+    logger.debug('loaded configuration: \n{}'.format(pprint.pformat(click_ctx.obj)))
+    click_ctx.obj['virtualenv_path'] = click_ctx.obj['ansible']['virtualenv']['path']
+    return
 
 
 def _terminal_width():
