@@ -2,6 +2,15 @@
 History
 =======
 
+0.2.0 (2018-12-26)
+------------------
+
+(delayed release, used from @dev branch for 6 months)
+
+* added clickable.bootstrap
+* added helpers for sphinx commands
+* added workaround for selinux and virtualenv
+
 0.1.1 (2018-02-10)
 ------------------
 
