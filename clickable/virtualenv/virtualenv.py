@@ -60,7 +60,7 @@ def _virtualenv(path_resolver, virtualenv):
             # check if selinux is available
             selinux_command = [python, '-c', 'import json; import selinux; print json.dumps(selinux.__file__)']
             try:
-                output = subprocess.check_output(selinux_command).encode(locale.getdefaultlocale()[1])
+                output = six.u(subprocess.check_output(selinux_command))
                 if not output:
                     logger.warn('selinux detected but not found')
                 else:
