@@ -19,4 +19,4 @@ def main():
     func_name = getattr(module, 'CLICK_MAPPING', default_func_name) \
         if hasattr(module, 'CLICK_MAPPING') \
         else default_func_name
-    getattr(module, default_func_name)()
+    getattr(module, func_name)()
