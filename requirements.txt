@@ -1,5 +1,5 @@
 Click==7.0
 blessings==1.7
 coloredlogs==10.0
-ruamel.yaml==0.15.89
+ruamel.yaml==0.15.90
 six==1.12.0
