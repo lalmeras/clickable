@@ -1,4 +1,9 @@
-import urlparse
+try:
+  # Py2
+  import urlparse
+except ImportError:
+  # Py3
+  import urllib.parse as urlparse
 
 from clickable.utils import interactive
 from clickable.utils import oneline_run
