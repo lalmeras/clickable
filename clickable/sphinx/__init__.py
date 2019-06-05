@@ -71,9 +71,9 @@ def sphinx_script(path_resolver, virtualenv_config, script, args=None):
         process_args.extend(args)
     env = dict(os.environ)
     env['PATH'] = ':'.join([
-        os.environ['PATH'],
         path_resolver.resolve_relative(
-            os.path.join(virtualenv_config['path'], 'bin'))
+            os.path.join(virtualenv_config['path'], 'bin')),
+        os.environ['PATH']
     ])
     interactive(process_args, env=env)
 
