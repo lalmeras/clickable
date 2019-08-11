@@ -58,9 +58,9 @@ def _virtualenv(path_resolver, virtualenv):
         # symlink selinux system-packages in virtualenv if needed and selinux found
         if selinux:
             # check if selinux is available
-            selinux_command = [python, '-c', 'import json; import selinux; print json.dumps(selinux.__file__)']
+            selinux_command = [python, '-c', 'from __future__ import print_function; import json; import selinux; print(json.dumps(selinux.__file__))']
             try:
-                output = six.u(subprocess.check_output(selinux_command))
+                output = six.u(subprocess.check_output(selinux_command, stderr=subprocess.STDOUT))
                 if not output:
                     logger.warn('selinux detected but not found')
                 else:
@@ -77,7 +77,7 @@ def _virtualenv(path_resolver, virtualenv):
             except subprocess.CalledProcessError as processError:
                 # selinux not available, ignore it
                 logger.warn('selinux not available, ignore it ({})'.format(selinux_command))
-                logger.warn(processError.output)
+                logger.warn(processError.output.decode('utf-8', errors='replace'))
     else:
         stdout.info('virtualenv: {} existing, skipping'
                     .format(os.path.basename(virtualenv_path_short)))
