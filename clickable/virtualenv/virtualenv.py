@@ -77,7 +77,7 @@ def _virtualenv(path_resolver, virtualenv):
             except subprocess.CalledProcessError as processError:
                 # selinux not available, ignore it
                 logger.warn('selinux not available, ignore it ({})'.format(selinux_command))
-                logger.warn(output)
+                logger.warn(processError.output)
     else:
         stdout.info('virtualenv: {} existing, skipping'
                     .format(os.path.basename(virtualenv_path_short)))
