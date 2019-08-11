@@ -142,7 +142,8 @@ def _pip_packages(path_resolver, virtualenv):
 
     p = subprocess.Popen(pi_args,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE,
+                         env=_pip_env(os.environ))
     pi_out = _subprocess_run(p)
     if p.returncode != 0:
         raise Exception(pi_out)
@@ -173,3 +174,18 @@ def _pip_freeze(pip_binary):
     pkglist_str = six.u(pkglist)
     pkglist_set = set(pkglist_str.splitlines())
     return pkglist_set
+
+def _pip_env(original_env):
+    """Add PKG_CONFIG_PATH if conda is detected. original_env is not modified.
+    Modified environment is the returned value. If original_env is not modified,
+    it may be the returned value.
+    """
+    conda_prefix = original_env.get('CONDA_PREFIX', None)
+    if conda_prefix is not None:
+        environ = dict(original_env)
+        environ.update({
+            'PKG_CONFIG_PATH': os.path.join(conda_prefix, 'lib', 'pkgconfig')
+        })
+        return environ
+    else:
+        return original_env
