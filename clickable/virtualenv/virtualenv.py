@@ -34,7 +34,7 @@ def _virtualenv(path_resolver, virtualenv):
     virtualenv_path = path_resolver.resolve_relative(virtualenv['path'])
     virtualenv_path_short = virtualenv['path']
     selinux = virtualenv.get('selinux', False)
-    python = virtualenv.get('python', '/usr/bin/python')
+    python = virtualenv.get('python', 'python')
     if not _check_virtualenv(virtualenv_path):
         stdout.info('virtualenv: {} missing, creating...'
                     .format(os.path.basename(virtualenv_path_short)))
@@ -54,34 +54,79 @@ def _virtualenv(path_resolver, virtualenv):
         if not _check_virtualenv(virtualenv_path):
             raise Exception('virtualenv {} creation fails'
                             .format(virtualenv_path))
-
         # symlink selinux system-packages in virtualenv if needed and selinux found
         if selinux:
-            # check if selinux is available
-            selinux_command = [python, '-c', 'from __future__ import print_function; import json; import selinux; print(json.dumps(selinux.__file__))']
-            try:
-                output = six.u(subprocess.check_output(selinux_command, stderr=subprocess.STDOUT))
-                if not output:
-                    logger.warn('selinux detected but not found')
-                else:
-                    location = json.loads(output)
-                    module_location = os.path.dirname(location)
-                    so_location = os.path.join(os.path.dirname(module_location), '_selinux.so')
-                    python_site_packages = glob.glob(os.path.join(virtualenv_path, 'lib', 'python*', 'site-packages'))[0]
-                    target_module_location = os.path.join(python_site_packages, 'selinux')
-                    target_so_location = os.path.join(python_site_packages, '_selinux.so')
-                    if not os.path.exists(target_module_location):
-                        os.symlink(module_location, target_module_location)
-                    if not os.path.exists(target_so_location):
-                        os.symlink(so_location, target_so_location)
-            except subprocess.CalledProcessError as processError:
-                # selinux not available, ignore it
-                logger.warn('selinux not available, ignore it ({})'.format(selinux_command))
-                logger.warn(processError.output.decode('utf-8', errors='replace'))
+            _selinux(virtualenv_path)
     else:
         stdout.info('virtualenv: {} existing, skipping'
                     .format(os.path.basename(virtualenv_path_short)))
 
+def _selinux(virtualenv_path):
+    # detect virtualenv version
+    python = os.path.join(virtualenv_path, 'bin', 'python')
+    python_command = [
+            python,
+            '-c',
+            'import sys, json; print(json.dumps(sys.version_info[0]))'
+    ]
+    output = six.u(subprocess.check_output(python_command, stderr=subprocess.STDOUT))
+    version = json.loads(output)
+
+    # search selinux from an interpreters list
+    interpreters = []
+    interpreters.append(python)
+    # if running in anaconda, we need to search selinux
+    # module in system install
+    if version == 2:
+        interpreters.append('/bin/python2')
+        interpreters.append('/usr/bin/python2')
+    else:
+        interpreters.append('/bin/python3')
+        interpreters.append('/usr/bin/python3')
+    logger.debug('Searching selinux in: {}'.format(', '.join(interpreters)))
+
+    # Iterate over interpreters list
+    # Install from the first selinux-enabled interpreter
+    selected_selinux = None
+    for selinux_python in interpreters:
+        # check if selinux is available
+        selinux_command = [
+                selinux_python,
+                '-c',
+                'from __future__ import print_function; '
+                + 'import json; '
+                + 'import selinux; '
+                + 'print(json.dumps([selinux.__file__, selinux._selinux.__file__]))'
+        ]
+        try:
+            output = six.u(subprocess.check_output(selinux_command, stderr=subprocess.STDOUT))
+            if not output:
+                logger.warn('selinux detected but not found for {}'.format(selinux_python))
+                break
+            else:
+                info = json.loads(output)
+                location = info[0]
+                so_location = info[1]
+                module_location = os.path.dirname(location)
+                python_site_packages = glob.glob(os.path.join(virtualenv_path, 'lib', 'python*', 'site-packages'))[0]
+                target_module_location = os.path.join(python_site_packages, 'selinux')
+                target_so_location = os.path.join(python_site_packages, '_selinux.so')
+                if not os.path.exists(target_module_location):
+                    os.symlink(module_location, target_module_location)
+                if not os.path.exists(target_so_location):
+                    os.symlink(so_location, target_so_location)
+                selected_selinux = selinux_python
+                break
+        except subprocess.CalledProcessError as processError:
+            # selinux not available, ignore it
+            logger.debug('selinux not available, ignore it ({})'.format(selinux_command))
+            logger.debug(processError.output.decode('utf-8', errors='replace'))
+
+    # info message if installation is done, else warn message
+    if selected_selinux:
+        stdout.info('Selinux installed from {}'.format(selected_selinux))
+    else:
+        stdout.warn('No selinux installation found. Selinux not installed.')
 
 def _check_virtualenv(virtualenv_path):
     """
