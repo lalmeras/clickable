@@ -100,27 +100,29 @@ def _selinux(virtualenv_path):
         ]
         try:
             output = six.u(subprocess.check_output(selinux_command, stderr=subprocess.STDOUT))
-            if not output:
-                logger.warn('selinux detected but not found for {}'.format(selinux_python))
-                break
-            else:
-                info = json.loads(output)
-                location = info[0]
-                so_location = info[1]
-                module_location = os.path.dirname(location)
-                python_site_packages = glob.glob(os.path.join(virtualenv_path, 'lib', 'python*', 'site-packages'))[0]
-                target_module_location = os.path.join(python_site_packages, 'selinux')
-                target_so_location = os.path.join(python_site_packages, '_selinux.so')
-                if not os.path.exists(target_module_location):
-                    os.symlink(module_location, target_module_location)
-                if not os.path.exists(target_so_location):
-                    os.symlink(so_location, target_so_location)
-                selected_selinux = selinux_python
-                break
         except subprocess.CalledProcessError as processError:
             # selinux not available, ignore it
             logger.debug('selinux not available, ignore it ({})'.format(selinux_command))
             logger.debug(processError.output.decode('utf-8', errors='replace'))
+            break
+        except Exception:
+            logger.debug('interpreter not found, skipping: {}'.format(selinux_command))
+            break
+        if not output:
+            logger.warn('selinux detected but not found for {}'.format(selinux_python))
+        else:
+            info = json.loads(output)
+            location = info[0]
+            so_location = info[1]
+            module_location = os.path.dirname(location)
+            python_site_packages = glob.glob(os.path.join(virtualenv_path, 'lib', 'python*', 'site-packages'))[0]
+            target_module_location = os.path.join(python_site_packages, 'selinux')
+            target_so_location = os.path.join(python_site_packages, '_selinux.so')
+            if not os.path.exists(target_module_location):
+                os.symlink(module_location, target_module_location)
+            if not os.path.exists(target_so_location):
+                os.symlink(so_location, target_so_location)
+            selected_selinux = selinux_python
 
     # info message if installation is done, else warn message
     if selected_selinux:
