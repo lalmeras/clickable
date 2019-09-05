@@ -11,7 +11,7 @@ History
 * tasks.py renamed to clickables.yml
 * added an helper to load base configuration from clickables.yml
   (clickables.utils.load_config)
-* python3 support (wip)
+* python3 support
 
 
 0.2.0 (2018-12-26)
