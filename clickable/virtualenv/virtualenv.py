@@ -104,10 +104,10 @@ def _selinux(virtualenv_path):
             # selinux not available, ignore it
             logger.debug('selinux not available, ignore it ({})'.format(selinux_command))
             logger.debug(processError.output.decode('utf-8', errors='replace'))
-            break
+            continue
         except Exception:
             logger.debug('interpreter not found, skipping: {}'.format(selinux_command))
-            break
+            continue
         if not output:
             logger.warn('selinux detected but not found for {}'.format(selinux_python))
         else:
