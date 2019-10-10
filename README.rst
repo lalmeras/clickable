@@ -9,10 +9,6 @@ clickable helper scripts
 .. image:: https://img.shields.io/travis/lalmeras/clickable.svg
         :target: https://travis-ci.org/lalmeras/clickable
 
-.. image:: https://readthedocs.org/projects/clickable/badge/?version=latest
-        :target: https://clickable.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
 .. image:: https://pyup.io/repos/github/lalmeras/clickable/shield.svg
      :target: https://pyup.io/repos/github/lalmeras/clickable/
      :alt: Updates
@@ -22,7 +18,6 @@ Helper scripts to write click applications development's environment
 
 
 * Free software: BSD license
-* Documentation: https://clickable.readthedocs.io.
 
 
 Features
