@@ -10,7 +10,7 @@ from types import ModuleType
 
 from blessings import Terminal
 
-from ruamel.yaml import YAML
+import yaml
 
 import six
 
@@ -42,8 +42,7 @@ def load_config(click_ctx, module_name, clickables_py, conf_filename = 'clickabl
     conf_path = os.path.join(click_ctx.obj['project_root'], 'clickables.yml')
     if os.path.isfile(conf_path):
         with open(conf_path) as f:
-            yaml = YAML(typ='safe')
-            configuration = yaml.load(f)
+            configuration = yaml.safe_load(f)
             click_ctx.obj.update(configuration)
     logger.debug('loaded configuration: \n{}'.format(pprint.pformat(click_ctx.obj)))
     click_ctx.obj['virtualenv_path'] = click_ctx.obj['ansible']['virtualenv']['path']
