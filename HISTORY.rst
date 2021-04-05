@@ -2,6 +2,15 @@
 History
 =======
 
+1.0 (not released)
+------------------
+
+* cleaned build system
+* tests reworked
+* updated dependencies
+* updated versioning scheme (major/minor)
+
+
 0.3.0 (2018-12)
 ---------------
 
