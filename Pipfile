@@ -19,6 +19,7 @@ pur = "*"
 sphinx = "*"
 
 [packages]
+clickable = {path = ".", editable = true}
 
 [pipenv]
 allow_prereleases = true
