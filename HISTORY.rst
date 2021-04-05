@@ -9,6 +9,7 @@ History
 * tests reworked
 * updated dependencies
 * updated versioning scheme (major/minor)
+* python requirement: 2.7+ to 3.6+
 
 
 0.3.0 (2018-12)
