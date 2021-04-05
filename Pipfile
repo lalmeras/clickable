@@ -5,8 +5,18 @@ verify_ssl = true
 
 [dev-packages]
 bump2version = "*"
+ipdb = "*"
+tox = "*"
+mock = "*"
+pytest = "*"
+pytest-cov = "*"
+mypy = "*"
+twine = "*"
+pylint = "*"
+rope = "*"
+black = ">= 20.8b1"
 
 [packages]
 
-[requires]
-python_version = "3.9"
+[pipenv]
+allow_prereleases = true
