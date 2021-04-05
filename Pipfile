@@ -15,6 +15,7 @@ twine = "*"
 pylint = "*"
 rope = "*"
 black = ">= 20.8b1"
+pur = "*"
 
 [packages]
 
