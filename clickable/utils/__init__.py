@@ -10,9 +10,9 @@ from types import ModuleType
 
 from blessings import Terminal
 
-import yaml
-
 import six
+
+import yaml
 
 logger = logging.getLogger(__name__)
 stdout = logging.getLogger('.'.join(['stdout', __name__]))
