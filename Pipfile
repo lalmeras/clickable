@@ -16,8 +16,12 @@ pylint = "*"
 rope = "*"
 black = ">= 20.8b1"
 pur = "*"
+sphinx = "*"
 
 [packages]
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+clickable-doc = "make -C docs"
