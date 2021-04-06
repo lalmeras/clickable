@@ -1,5 +1,4 @@
 """Clickable logging framework"""
-from __future__ import print_function  # pylint: disable=unused-import
 
 __version__ = "0.9.0"
 

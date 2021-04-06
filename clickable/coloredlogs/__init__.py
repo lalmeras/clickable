@@ -1,5 +1,3 @@
-from __future__ import print_function  # pylint: disable=unused-import
-
 import logging
 import sys
 
