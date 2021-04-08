@@ -10,6 +10,7 @@ History
 * updated dependencies
 * updated versioning scheme (major/minor)
 * python requirement: mandatory 3.6+ (previously 2.7+)
+* ruamel.yaml replaced by PyYAML
 
 
 0.3.0 (2018-12)
