@@ -114,7 +114,7 @@ class TestClickable(unittest.TestCase):
         _find_callable_mapping.assert_called_once_with(module)
         _find_callable_name.assert_called_once_with(mapping, "callable_key")
         stderr.write.is_called()
-        messages = " ".join([m.args[0] for m in stderr.write.call_args_list])
+        messages = " ".join([_call_args_args(m)[0] for m in stderr.write.call_args_list])
         assert "callable_key" in messages
         assert str(_find_callable_name.return_value) in messages
         assert "invalid" in messages
@@ -139,11 +139,13 @@ class TestClickable(unittest.TestCase):
         _find_callable_mapping.assert_called_once_with(module)
         _find_callable_name.assert_called_once_with(mapping, "callable_key")
         stderr.write.is_called()
-        messages = " ".join([m.args[0] for m in stderr.write.call_args_list])
+        messages = " ".join([_call_args_args(m)[0] for m in stderr.write.call_args_list])
         assert "is not a callable" in messages
         assert "__not callable__" in messages
         assert func == False
 
 
-
-
+def _call_args_args(call_args):
+    # args only exist from py38;
+    # use tuple lookup: positional args in first tuple
+    return call_args[0]
