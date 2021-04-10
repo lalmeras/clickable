@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Tests for `clickable` package."""
+"""Tests for `clickable.click` package."""
 
 
 import os
@@ -11,8 +11,8 @@ import unittest.mock
 import clickable.click
 
 
-class TestClickable(unittest.TestCase):
-    """Tests for `clickable` package."""
+class TestClickableClick(unittest.TestCase):
+    """Tests for `clickable.click` package."""
 
     def test_clickable_debug(self):
         """Test environment variable lookup to boolean. true/yes/1
@@ -48,7 +48,7 @@ class TestClickable(unittest.TestCase):
 
     def test_find_callable_name_no_mapping(self):
         """Test fallback."""
-        assert clickable.click._find_callable_name(None, "whatever") == 'main'
+        assert clickable.click._find_callable_name(None, "whatever") == "whatever"
 
     def test_find_callable_name_mapping_not_found(self):
         """Test mapping present, but no entry for key."""
@@ -77,12 +77,11 @@ class TestClickable(unittest.TestCase):
     @unittest.mock.patch("clickable.click._find_callable_name")
     @unittest.mock.patch("clickable.click._find_callable_mapping")
     @unittest.mock.patch("clickable.click._get_callable_key")
-    def test_find_callable(self, _get_callable_key, _find_callable_mapping,
-                           _find_callable_name, stderr):
+    def test_find_callable(self, c_key, c_mapping, c_name, stderr):
         """Key and mapping lookup success. Callable is found and returned.
         Check messages."""
-        _find_callable_name.return_value = "callable_name"
-        _get_callable_key.return_value = "callable_key"
+        c_name.return_value = "callable_name"
+        c_key.return_value = "callable_key"
         module = unittest.mock.MagicMock()
         module.callable_name = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
@@ -94,20 +93,38 @@ class TestClickable(unittest.TestCase):
     @unittest.mock.patch("clickable.click._find_callable_name")
     @unittest.mock.patch("clickable.click._find_callable_mapping")
     @unittest.mock.patch("clickable.click._get_callable_key")
-    def test_find_callable_name_not_found(self, _get_callable_key, _find_callable_mapping,
-                                          _find_callable_name, stderr):
+    def test_find_callable_fallback(self, c_key, c_mapping, c_name, stderr):
+        """If no mapping and `callable_key` not found, fallback to `main`."""
+        c_key.return_value = "callable_key"
+        c_mapping.return_value = None
+        c_name.return_value = "callable_key"
+        module = unittest.mock.MagicMock()
+        # callable_key not a callable
+        module.callable_key = None
+        # main fallback
+        module.main = unittest.mock.MagicMock()
+        func = clickable.click._find_callable(module)
+        
+        stderr.write.is_not_called()
+        assert func == module.main
+
+    @unittest.mock.patch("sys.stderr")
+    @unittest.mock.patch("clickable.click._find_callable_name")
+    @unittest.mock.patch("clickable.click._find_callable_mapping")
+    @unittest.mock.patch("clickable.click._get_callable_key")
+    def test_find_callable_name_not_found(self, c_key, c_mapping, c_name, stderr):
         """Callable name not found. Check messages."""
         mapping = unittest.mock.MagicMock()
-        _find_callable_mapping.return_value = mapping
-        _find_callable_name.return_value = None
-        _get_callable_key.return_value = "callable_key"
+        c_mapping.return_value = mapping
+        c_name.return_value = None
+        c_key.return_value = "callable_key"
         module = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
 
         stderr.write.is_called()
         messages = _write_messages(sys.stderr)
         assert "callable_key" in messages
-        assert str(_find_callable_name.return_value) in messages
+        assert str(c_name.return_value) in messages
         assert "invalid" in messages
         assert func == False
 
@@ -115,13 +132,12 @@ class TestClickable(unittest.TestCase):
     @unittest.mock.patch("clickable.click._find_callable_name")
     @unittest.mock.patch("clickable.click._find_callable_mapping")
     @unittest.mock.patch("clickable.click._get_callable_key")
-    def test_find_callable_not_callable(self, _get_callable_key, _find_callable_mapping,
-                                        _find_callable_name, stderr):
+    def test_find_callable_not_callable(self, c_key, c_mapping, c_name, stderr):
         """Key and mapping lookup success but callable not found. Check messages."""
         mapping = unittest.mock.MagicMock()
-        _find_callable_mapping.return_value = mapping
-        _find_callable_name.return_value = "callable_name"
-        _get_callable_key.return_value = "callable_key"
+        c_mapping.return_value = mapping
+        c_name.return_value = "callable_name"
+        c_key.return_value = "callable_key"
         module = unittest.mock.MagicMock()
         module.callable_name = "__not callable__"
         func = clickable.click._find_callable(module)
