@@ -81,17 +81,12 @@ class TestClickable(unittest.TestCase):
                            _find_callable_name, stderr):
         """Key and mapping lookup success. Callable is found and returned.
         Check messages."""
-        mapping = unittest.mock.MagicMock()
-        _find_callable_mapping.return_value = mapping
         _find_callable_name.return_value = "callable_name"
         _get_callable_key.return_value = "callable_key"
         module = unittest.mock.MagicMock()
         module.callable_name = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
         
-        _get_callable_key.assert_called_once_with()
-        _find_callable_mapping.assert_called_once_with(module)
-        _find_callable_name.assert_called_once_with(mapping, "callable_key")
         stderr.write.is_not_called()
         assert func == module.callable_name
 
@@ -101,20 +96,16 @@ class TestClickable(unittest.TestCase):
     @unittest.mock.patch("clickable.click._get_callable_key")
     def test_find_callable_name_not_found(self, _get_callable_key, _find_callable_mapping,
                                           _find_callable_name, stderr):
-        """Key and mapping lookup fails. Callable name not found. Check messages."""
+        """Callable name not found. Check messages."""
         mapping = unittest.mock.MagicMock()
         _find_callable_mapping.return_value = mapping
-        _find_callable_name.return_value = object()
+        _find_callable_name.return_value = None
         _get_callable_key.return_value = "callable_key"
         module = unittest.mock.MagicMock()
-        module.callable_name = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
-        
-        _get_callable_key.assert_called_once_with()
-        _find_callable_mapping.assert_called_once_with(module)
-        _find_callable_name.assert_called_once_with(mapping, "callable_key")
+
         stderr.write.is_called()
-        messages = " ".join([_call_args_args(m)[0] for m in stderr.write.call_args_list])
+        messages = _write_messages(sys.stderr)
         assert "callable_key" in messages
         assert str(_find_callable_name.return_value) in messages
         assert "invalid" in messages
@@ -135,14 +126,16 @@ class TestClickable(unittest.TestCase):
         module.callable_name = "__not callable__"
         func = clickable.click._find_callable(module)
         
-        _get_callable_key.assert_called_once_with()
-        _find_callable_mapping.assert_called_once_with(module)
-        _find_callable_name.assert_called_once_with(mapping, "callable_key")
         stderr.write.is_called()
-        messages = " ".join([_call_args_args(m)[0] for m in stderr.write.call_args_list])
+        messages = _write_messages(sys.stderr)
         assert "is not a callable" in messages
         assert "__not callable__" in messages
         assert func == False
+
+
+def _write_messages(stream):
+    # concat written messages from a stream mock
+    return " ".join([_call_args_args(m)[0] for m in stream.write.call_args_list])
 
 
 def _call_args_args(call_args):
