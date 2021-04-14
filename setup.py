@@ -32,6 +32,7 @@ setup(
     packages=find_packages(include=['clickable', 'clickable.*']),
     entry_points={
         'console_scripts': [
+            "clickable = clickable.click:main"
         ]
     },
     include_package_data=True,

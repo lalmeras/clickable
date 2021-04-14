@@ -74,7 +74,7 @@ def _import(filename, loader=__import__):
 def _find_callable(module):
     """Extract callable from module. Fallback to `main` if no mapping is
     available and key is not a valid callable.
-    
+
     Print error messages and
     abort if some errors are encountered. Returns false if find failed."""
     # lookup expected callable
@@ -108,7 +108,7 @@ def main():
     * if str, used as a callable name
     * if dict, used as a `sys.argv[O]` mapping to find callable name
     * if previous lookup failed, use `main` as callable name
-    * else fails with a `sys.exit(1)` and an error message
+    * else fails with a `sys.exit(2)` and an error message
 
     `sys.argv[0]` is modified to replace `[^-.]` by `_`. Behavior
     with other not alphabetic, not numeric chars is undetermined.
@@ -119,17 +119,19 @@ def main():
     try:
         module = _import("clickables.py")
     except Exception as e:
+        _error("clickables.py cannot be loaded.")
         if _clickable_debug():
             import traceback
-            traceback.print_exc(e)
+            traceback.print_exc(e, file=sys.stderr)
         else:
             _error(str(e))
             _error("Use CLICKABLE_DEBUG=1 to get details.")
+            sys.exit(2)
 
     func = _find_callable(module)
     if not func:
         # Error message previously printed
-        sys.exit(1)
+        sys.exit(2)
 
     try:
         func()
@@ -139,7 +141,7 @@ def main():
         else:
             _error("Uncaught error during execution: {}".format(str(e)))
             _error("Use CLICKABLE_DEBUG=1 to get details.")
-            sys.exit(1)
+            sys.exit(2)
 
 
 def _error(message):

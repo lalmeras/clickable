@@ -8,10 +8,12 @@ import sys
 import unittest
 import unittest.mock
 
+import pytest
+
 import clickable.click
 
 
-class TestClickableClick(unittest.TestCase):
+class TestClickableClick:
     """Tests for `clickable.click` package."""
 
     def test_clickable_debug(self):
@@ -85,7 +87,7 @@ class TestClickableClick(unittest.TestCase):
         module = unittest.mock.MagicMock()
         module.callable_name = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
-        
+
         stderr.write.is_not_called()
         assert func == module.callable_name
 
@@ -104,7 +106,7 @@ class TestClickableClick(unittest.TestCase):
         # main fallback
         module.main = unittest.mock.MagicMock()
         func = clickable.click._find_callable(module)
-        
+
         stderr.write.is_not_called()
         assert func == module.main
 
@@ -141,12 +143,20 @@ class TestClickableClick(unittest.TestCase):
         module = unittest.mock.MagicMock()
         module.callable_name = "__not callable__"
         func = clickable.click._find_callable(module)
-        
+
         stderr.write.is_called()
         messages = _write_messages(sys.stderr)
         assert "is not a callable" in messages
         assert "__not callable__" in messages
         assert func == False
+
+    def test_main(self, capsys):
+        with unittest.mock.patch.object(sys, "argv", []):
+            with pytest.raises(SystemExit) as e:
+                clickable.click.main()
+            assert e.value.code == 2
+            captured = capsys.readouterr()
+            assert "clickables.py" in captured.err
 
 
 def _write_messages(stream):
