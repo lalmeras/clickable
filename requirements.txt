@@ -1,5 +1,5 @@
 click==7.1.2
 blessings==1.7
-coloredlogs==15.0
+coloredlogs==15.0.1
 PyYAML
 six==1.15.0
