@@ -11,12 +11,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-with open('requirements.txt') as requirements_file:
-    requirements = requirements_file.read()
-
-setup_requirements = [
-]
-
 test_requirements = [
 ]
 
@@ -36,7 +30,12 @@ setup(
         ]
     },
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+        "click==7.1.2",
+        "blessings==1.7",
+        "coloredlogs==15.0.1",
+        "PyYAML==5.4.1"
+        ],
     python_requires='>=3.6',
     license="BSD license",
     zip_safe=False,
@@ -52,5 +51,5 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    setup_requires=setup_requirements,
+    setup_requires=["wheel"],
 )

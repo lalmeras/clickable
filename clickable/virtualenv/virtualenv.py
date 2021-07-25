@@ -5,8 +5,6 @@ import logging
 import os.path
 import subprocess
 
-import six
-
 from clickable.utils import _subprocess_run
 
 logger = logging.getLogger(__name__)
@@ -69,7 +67,7 @@ def _selinux(virtualenv_path):
             '-c',
             'import sys, json; print(json.dumps(sys.version_info[0]))'
     ]
-    output = six.u(subprocess.check_output(python_command, stderr=subprocess.STDOUT))
+    output = subprocess.check_output(python_command, stderr=subprocess.STDOUT, text=True)
     version = json.loads(output)
 
     # search selinux from an interpreters list
@@ -98,7 +96,7 @@ def _selinux(virtualenv_path):
                 + 'print(json.dumps([selinux.__file__, selinux._selinux.__file__]))'
         ]
         try:
-            output = six.u(subprocess.check_output(selinux_command, stderr=subprocess.STDOUT))
+            output = subprocess.check_output(selinux_command, stderr=subprocess.STDOUT, text=True)
         except subprocess.CalledProcessError as processError:
             # selinux not available, ignore it
             logger.debug('selinux not available, ignore it ({})'.format(selinux_command))
@@ -213,11 +211,11 @@ def _pip_freeze(pip_binary):
     p = subprocess.Popen(pf_args,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    out = _subprocess_run(p)
+    out = _subprocess_run(p, text=True)
     if p.returncode != 0:
         raise Exception(out)
     pkglist = out
-    pkglist_str = six.u(pkglist)
+    pkglist_str = pkglist
     pkglist_set = set(pkglist_str.splitlines())
     return pkglist_set
 

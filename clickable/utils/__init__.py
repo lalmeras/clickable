@@ -10,8 +10,6 @@ from types import ModuleType
 
 from blessings import Terminal
 
-import six
-
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -24,7 +22,7 @@ class PathResolver(object):
     def __init__(self, base_element):
         if type(base_element) == ModuleType:
             self.base_path = os.path.dirname(base_element.__file__)
-        elif isinstance(base_element, six.string_types):
+        elif isinstance(base_element, str):
             self.base_path = os.path.abspath(base_element)
             if not os.path.isabs(base_element):
                 logger.warn('non-absolute path is resolved as {}'
