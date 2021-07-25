@@ -61,8 +61,8 @@ def _terminal_width():
     return __terminal_width if __terminal_width != 0 else None
 
 
-def oneline_run(args):
-    return run(args, oneline_mode=True)
+def oneline_run(args, env=None, clear_env=False):
+    return run(args, oneline_mode=True, env=None, clear_env=False)
 
 
 def run(args, oneline_mode=False, env=None, clear_env=False):

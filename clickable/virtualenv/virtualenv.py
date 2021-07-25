@@ -210,8 +210,9 @@ def _pip_freeze(pip_binary):
     pf_args.append('freeze')
     p = subprocess.Popen(pf_args,
                          stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    out = _subprocess_run(p, text=True)
+                         stderr=subprocess.PIPE,
+                         text=True)
+    out = _subprocess_run(p)
     if p.returncode != 0:
         raise Exception(out)
     pkglist = out
