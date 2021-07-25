@@ -4,8 +4,6 @@ import os.path
 
 import click
 
-from clickable.utils import interactive
-from clickable.utils import oneline_run
 from clickable.virtualenv import virtualenv
 
 logger = logging.getLogger(__name__)
@@ -73,7 +71,7 @@ def sphinx_script(path_resolver, virtualenv_config, script, args=None):
             os.path.join(virtualenv_config['path'], 'bin')),
         os.environ['PATH']
     ])
-    interactive(process_args, env=env)
+    subprocess.check_call(process_args, env=env)
 
 
 def sphinx_clean(path_resolver, documentation_path):
@@ -89,7 +87,7 @@ def sphinx_clean(path_resolver, documentation_path):
     args.extend(['rm', '-rf'])
     args.extend([os.path.normpath(os.path.join(sphinx_build_path, item))
                  for item in items])
-    oneline_run(args)
+    subprocess.check_call(args)
 
 
 def sphinx_build(path_resolver, sphinx_config, virtualenv_config, target):

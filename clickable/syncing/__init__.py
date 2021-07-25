@@ -5,12 +5,9 @@ except ImportError:
   # Py3
   import urllib.parse as urlparse
 
-from clickable.utils import interactive
-from clickable.utils import oneline_run
-
 
 def lftp_sync(src, url, excludes=[], delete=True, dry_run=False,
-              subprocess_mode='interactive', pre_commands=[]):
+              pre_commands=[]):
     parsed_url = urlparse.urlparse(url)
     # url without path
     base_url = urlparse.urlunparse([parsed_url.scheme, parsed_url.netloc, '',
@@ -29,18 +26,10 @@ quit
            excludes=' '.join(excludes_args),
            delete='--delete' if delete else '',
            pre=';\n'.join(pre_commands)))
-    known_modes = ['interactive', 'oneline']
-    if subprocess_mode not in known_modes:
-        raise Exception('subprocess_mode {} not allowed, expected ({})'
-                        .format(subprocess_mode, ', '.join(known_modes)))
-    if subprocess_mode == 'interactive':
-        interactive(args)
-    elif subprocess_mode == 'oneline':
-        oneline_run(args)
+    subprocess.check_call(args)
 
 
-def rsync(src, dest, options=['-az'], excludes=[], delete=True, dry_run=False,
-              subprocess_mode='interactive'):
+def rsync(src, dest, options=['-az'], excludes=[], delete=True, dry_run=False):
     excludes_args = ['--exclude={}'.format(i) for i in excludes]
 
     args = []
@@ -56,12 +45,4 @@ def rsync(src, dest, options=['-az'], excludes=[], delete=True, dry_run=False,
         args.extend(excludes_args)
     args.append(src)
     args.append(dest)
-
-    known_modes = ['interactive', 'oneline']
-    if subprocess_mode not in known_modes:
-        raise Exception('subprocess_mode {} not allowed, expected ({})'
-                        .format(subprocess_mode, ', '.join(known_modes)))
-    if subprocess_mode == 'interactive':
-        interactive(args)
-    elif subprocess_mode == 'oneline':
-        oneline_run(args)
+    subprocess.check_call(args)

@@ -3,9 +3,8 @@ import json
 import locale
 import logging
 import os.path
+import shlex
 import subprocess
-
-from clickable.utils import _subprocess_run
 
 logger = logging.getLogger(__name__)
 stdout = logging.getLogger('.'.join(['stdout', __name__]))
@@ -46,12 +45,10 @@ def _virtualenv(path_resolver, virtualenv):
         if python:
             command.extend(['-p', python])
         command.append(virtualenv_path)
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        _subprocess_run(p)
+        subprocess.check_call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # check consistency; virtualenv must be valid now
         if not _check_virtualenv(virtualenv_path):
-            raise Exception('virtualenv {} creation fails'
-                            .format(virtualenv_path))
+            raise Exception('virtualenv {} creation fails'.format(virtualenv_path))
         # symlink selinux system-packages in virtualenv if needed and selinux found
         if selinux:
             _selinux(virtualenv_path)
@@ -140,13 +137,13 @@ def _check_virtualenv(virtualenv_path):
     # check <virtualenv_path>/bin/python existence
     python_bin = os.path.join(virtualenv_path, 'bin/python')
     logger.info(python_bin)
-    p = None
+    found = False
     try:
-        p = subprocess.Popen(
+        subprocess.check_call(
             [python_bin, '--version'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        _subprocess_run(p)
+        found = True
     except Exception:
         logger.debug('bin/python not found in {}'.format(python_bin),
                      exc_info=True)
@@ -154,11 +151,11 @@ def _check_virtualenv(virtualenv_path):
                 .format(
                     python_bin,
                     'found'
-                    if p is not None and p.returncode == 0
+                    if found
                     else 'not found'
                 )
                 )
-    return p is not None and p.returncode == 0
+    return found
 
 
 def _pip_packages(path_resolver, virtualenv):
@@ -184,14 +181,15 @@ def _pip_packages(path_resolver, virtualenv):
     for package in virtualenv['requirements']:
         pi_args.append(package)
 
-    p = subprocess.Popen(pi_args,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         env=_pip_env(os.environ))
-    pi_out = _subprocess_run(p)
-    if p.returncode != 0:
-        raise Exception(pi_out)
-
+    cmd = " ".join([shlex.quote(i) for i in pi_args])
+    try:
+        subprocess.check_output(pi_args,
+            stderr=subprocess.PIPE,
+            env=_pip_env(os.environ))
+    except subprocess.CalledProcessError as e1:
+        raise Exception("Command {} failed with output: {}".format(cmd, e.output)) from e1
+    except Exception as e2:
+        raise Exception("Command {} failed".format(cmd)) from e2
     # print some feedback about installs
     final_pkglist_set = _pip_freeze(pip_binary)
     logger.debug('virtualenv: pip post-install status\n\t{}'
@@ -208,13 +206,15 @@ def _pip_freeze(pip_binary):
     pf_args = []
     pf_args.append(pip_binary)
     pf_args.append('freeze')
-    p = subprocess.Popen(pf_args,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         text=True)
-    out = _subprocess_run(p)
-    if p.returncode != 0:
-        raise Exception(out)
+    cmd = " ".join([shlex.quote(i) for i in pf_args])
+    try:
+        out = subprocess.check_output(pf_args,
+                stderr=subprocess.STDOUT,
+                text=True)
+    except subprocess.CalledProcessError as e1:
+        raise Exception("Command {} failed with output: {}".format(cmd, e.output)) from e1
+    except Exception as e2:
+        raise Exception("Command {} failed".format(cmd)) from e2
     pkglist = out
     pkglist_str = pkglist
     pkglist_set = set(pkglist_str.splitlines())
