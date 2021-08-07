@@ -88,7 +88,7 @@ def _selinux(virtualenv_path):
         selinux_command = [
                 selinux_python,
                 '-c',
-                + 'import json; '
+                'import json; '
                 + 'import selinux; '
                 + 'print(json.dumps([selinux.__file__, selinux._selinux.__file__]))'
         ]
