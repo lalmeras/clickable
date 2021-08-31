@@ -1,18 +1,4 @@
-========================
-clickable helper scripts
-========================
-
-
-.. image:: https://img.shields.io/pypi/v/clickable.svg
-        :target: https://pypi.python.org/pypi/clickable
-
-.. image:: https://img.shields.io/travis/lalmeras/clickable.svg
-        :target: https://travis-ci.org/lalmeras/clickable
-
-.. image:: https://pyup.io/repos/github/lalmeras/clickable/shield.svg
-     :target: https://pyup.io/repos/github/lalmeras/clickable/
-     :alt: Updates
-
+# clickable helper scripts
 
 Helper scripts to write click applications development's environment
 
@@ -20,8 +6,7 @@ Helper scripts to write click applications development's environment
 * Free software: BSD license
 
 
-Features
---------
+## Features
 
 Clickable allows to easily write python and shell-based tools for your projects.
 
@@ -45,12 +30,19 @@ Clickable is based on the following building-blocks:
 Clickable is heavily based on Python, Conda, Poetry and Click projects.
 
 
-Release
--------
+## Release
 
 Stable branch is `master`; development branch is `dev`. Usual release steps are :
 
 ```
+# install dev tools and switch in pipenv
+pipenv install --dev
+pipenv shell
+
+# if needed, update Pipfile.lock and commit changes
+pipenv lock --clear
+pipenv install --dev
+
 # prepare dev branch for release...
 # update version
 # increase version; may be launch multiple time to cycle dev, rc, ...
@@ -63,20 +55,10 @@ git merge dev
 
 # prepare next development version (+1dev0)
 git checkout dev
-bump2version --verbose minor
+bump2version --verbose --no-tag minor
 
 # push all (launch with --dry-run to check before actual update)
 # delete (git tag -d <tag> unneeded tags - dev, rc)
 git push --all
 git push --tag
 ```
-
-
-Credits
----------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-
