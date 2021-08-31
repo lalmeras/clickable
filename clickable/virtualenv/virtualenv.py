@@ -97,7 +97,7 @@ def _selinux(virtualenv_path):
         except subprocess.CalledProcessError as processError:
             # selinux not available, ignore it
             logger.debug('selinux not available, ignore it ({})'.format(selinux_command))
-            logger.debug(processError.output.decode('utf-8', errors='replace'))
+            logger.debug(processError.output)
             continue
         except Exception:
             logger.debug('interpreter not found, skipping: {}'.format(selinux_command))
@@ -187,7 +187,7 @@ def _pip_packages(path_resolver, virtualenv):
             stderr=subprocess.PIPE,
             env=_pip_env(os.environ))
     except subprocess.CalledProcessError as e1:
-        raise Exception("Command {} failed with output: {}".format(cmd, e.output)) from e1
+        raise Exception("Command {} failed with output: {}".format(cmd, e1.output)) from e1
     except Exception as e2:
         raise Exception("Command {} failed".format(cmd)) from e2
     # print some feedback about installs
@@ -212,7 +212,7 @@ def _pip_freeze(pip_binary):
                 stderr=subprocess.STDOUT,
                 text=True)
     except subprocess.CalledProcessError as e1:
-        raise Exception("Command {} failed with output: {}".format(cmd, e.output)) from e1
+        raise Exception("Command {} failed with output: {}".format(cmd, e1.output)) from e1
     except Exception as e2:
         raise Exception("Command {} failed".format(cmd)) from e2
     pkglist = out
