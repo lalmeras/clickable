@@ -2,6 +2,9 @@
 clickable helper scripts
 ========================
 
+**warning** master branch points to v0.3.0; please use v0.3.0 tag to use old release
+or use main branch.
+
 
 .. image:: https://img.shields.io/pypi/v/clickable.svg
         :target: https://pypi.python.org/pypi/clickable
