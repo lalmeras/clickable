@@ -31,7 +31,7 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        "click==7.1.2",
+        "click==8.0.1",
         "blessings==1.7",
         "coloredlogs==15.0.1",
         "PyYAML==5.4.1"
