@@ -1,3 +1,7 @@
+# v1.2 (2021-09-24)
+
+Fix subprocess import in sphinx module.
+
 # v1.1 (2021-08-31)
 
 Fix virtualenv syntax issues:
