@@ -1,16 +1,12 @@
-try:
-  # Py2
-  import urlparse
-except ImportError:
-  # Py3
-  import urllib.parse as urlparse
+import subprocess
+import urllib.parse
 
 
 def lftp_sync(src, url, excludes=[], delete=True, dry_run=False,
               pre_commands=[]):
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urllib.parse.urlparse(url)
     # url without path
-    base_url = urlparse.urlunparse([parsed_url.scheme, parsed_url.netloc, '',
+    base_url = urllib.parse.urlunparse([parsed_url.scheme, parsed_url.netloc, '',
                                    None, None, None])
     excludes_args = ['--exclude {}'.format(i) for i in excludes]
     args = []

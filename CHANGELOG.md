@@ -1,3 +1,7 @@
+# v1.3 (2021-09-24)
+
+Fix subprocess import in syncing module.
+
 # v1.2 (2021-09-24)
 
 Fix subprocess import in sphinx module.
