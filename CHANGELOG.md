@@ -1,3 +1,7 @@
+# v1.4 (2021-12-24)
+
+publishing update.
+
 # v1.3 (2021-09-24)
 
 Fix subprocess import in syncing module.
