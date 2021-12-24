@@ -20,6 +20,7 @@ setup(
     description=("Helper scripts to write click applications development's "
                  "environment"),
     long_description=readme + '\n\n' + history,
+    long_description_content_type="text/markdown",
     author="Laurent Almeras",
     author_email='lalmeras@gmail.com',
     url='https://github.com/lalmeras/clickable',
