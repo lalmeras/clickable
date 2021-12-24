@@ -46,7 +46,7 @@ pipenv install --dev
 # prepare dev branch for release...
 # update version
 # increase version; may be launch multiple time to cycle dev, rc, ...
-bump2version --verbose prerel
+bump2version --verbose prerel [--allow-dirty] [--no-commit] [--no-tag]
 
 # merge on main
 git checkout main
