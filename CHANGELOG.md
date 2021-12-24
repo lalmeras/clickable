@@ -1,6 +1,10 @@
+# 1.5 (2021-12-25)
+
+Fix packaging.
+
 # v1.4 (2021-12-24)
 
-publishing update.
+Publishing procedure update.
 
 # v1.3 (2021-09-24)
 
