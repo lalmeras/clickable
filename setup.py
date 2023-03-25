@@ -35,7 +35,7 @@ setup(
         "click==8.0.1",
         "blessings==1.7",
         "coloredlogs==15.0.1",
-        "PyYAML==5.4.1"
+        "PyYAML==6.0"
         ],
     python_requires='>=3.6',
     license="BSD license",
