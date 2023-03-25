@@ -118,7 +118,6 @@ def sphinx_live(path_resolver, sphinx_config, virtualenv_config):
     sphinx_build_path = path_resolver.resolve_relative(
         os.path.join(documentation_path, 'build', 'html'))
     args = []
-    args.append('-B')
     args.extend(['--ignore', '*.swp'])
     args.extend(['--ignore', '*.log'])
     args.extend(['--ignore', '*~'])
