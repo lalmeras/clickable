@@ -102,6 +102,7 @@ def sphinx_build(path_resolver, sphinx_config, virtualenv_config, target):
         os.path.join(documentation_path, 'build', 'html'))
     args = []
     args.extend(['-b', target])
+    args.extend(['-j', 'auto'])
     args.append(sphinx_source_path)
     args.append(sphinx_build_path)
     sphinx_script(path_resolver, virtualenv_config,
@@ -122,6 +123,7 @@ def sphinx_live(path_resolver, sphinx_config, virtualenv_config):
     args.extend(['--ignore', '*.log'])
     args.extend(['--ignore', '*~'])
     args.extend(['-b', 'html'])
+    args.extend(['-j', 'auto'])
     args.append(sphinx_source_path)
     args.append(sphinx_build_path)
     sphinx_script(path_resolver, virtualenv_config, 'sphinx-autobuild', args)
