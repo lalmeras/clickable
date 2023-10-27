@@ -1,3 +1,7 @@
+# 1.8 (2023-10-27)
+
+Fix installation (cython 3.0 issue with pyyaml)
+
 # 1.5 (2021-12-25)
 
 Fix packaging.
